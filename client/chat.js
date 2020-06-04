@@ -2,7 +2,7 @@ const socket = io();
 const typing = document.getElementById('typing');
 const messages = document.getElementById('messages');
 const messageInfo = document.querySelector('#messages-message');
-const handle = document.getElementById('handle');
+const username = document.getElementById('username');
 const message = document.getElementById('message');
 const button = document.getElementById('button');
 let timeoutID;
@@ -12,11 +12,11 @@ let timeoutID;
 button.addEventListener('click', () => {
   clearTimeout(timeoutID);
   socket.emit('notTyping', {
-    handle: handle.value
+    username: username.value
   });
 
   socket.emit('message', {
-    handle: handle.value,
+    username: username.value,
     message: message.value,
   });
 
@@ -27,12 +27,12 @@ message.addEventListener('input', () => {
   clearTimeout(timeoutID);
 
   socket.emit('typing', {
-    handle: handle.value
+    username: username.value
   });
 
   timeoutID = setTimeout(() => {
     socket.emit('notTyping', {
-      handle: handle.value
+      username: username.value // not necessary
     });
   }, 1000);
 
@@ -45,13 +45,13 @@ message.addEventListener('input', () => {
 socket.on('message', data => {
   messageInfo.style.display = 'none';
   messages.innerHTML = `
-    <p><span class="handle">${data.handle}: </span>${data.message}</p>
+    <p><span class="username">${data.username}: </span>${data.message}</p>
     ${messages.innerHTML}
   `;
 });
 
 socket.on('typing', data => {
-  typing.innerText = `${data.handle} is typing...`;
+  typing.innerText = `${data.username} is typing...`;
 });
 
 socket.on('notTyping', data => {
