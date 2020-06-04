@@ -1,7 +1,7 @@
 const socket = io();
 const typing = document.getElementById('typing');
 const messages = document.getElementById('messages');
-const messageInfo = document.querySelector('#messages-message');
+const startTheConversation = document.getElementById('start-the-conversation');
 const username = document.getElementById('username');
 const message = document.getElementById('message');
 const button = document.getElementById('button');
@@ -43,7 +43,7 @@ message.addEventListener('input', () => {
 
 // listen for events
 socket.on('message', data => {
-  messageInfo.style.display = 'none';
+  startTheConversation.style.display = 'none';
   messages.innerHTML = `
     <p><span class="username">${data.username}: </span>${data.message}</p>
     ${messages.innerHTML}
