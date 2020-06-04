@@ -10,10 +10,15 @@
 <body>
 
   <div class="container">
-    <h1>Socket.io Chat</h1>
-    <div class="container" id="messages">
-      <p id="message-info">Messages show up here...</p>
+    <header>
+      <h1>Socket.io Chat</h1>
+    </header>
+
+    <small id="typing">&nbsp;</small>
+    <div id="messages">
+      <p id="messages-message">Messages show up here...</p>
     </div>
+
     <form>
       <div class="form-group">
         <label for="handle">Handle</label>
@@ -24,8 +29,8 @@
         <textarea class="form-control" id="message" rows="3"></textarea>
       </div>
       <button id="button" type="button" class="btn btn-dark btn-lg btn-block">Send</button>
-    </form>
-  </div>
+    </div>
+  </form>
 
   <script src="/socket.io.js"></script>
   <script src="/chat.js"></script>
