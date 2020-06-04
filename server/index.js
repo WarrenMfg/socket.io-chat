@@ -11,7 +11,6 @@ const server = app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
 const io = socket(server);
 
 io.on('connection', (socket) => {
-
   socket.on('message', data => {
     io.sockets.emit('message', data);
   });
