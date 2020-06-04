@@ -7,17 +7,20 @@ const message = document.getElementById('message');
 const button = document.getElementById('button');
 let timeoutID;
 
+// DOMpurify config
+DOMPurify.setConfig({ALLOWED_TAGS: []});
+
 
 // emit events
 button.addEventListener('click', () => {
   clearTimeout(timeoutID);
   socket.emit('notTyping', {
-    username: username.value
+    username: DOMPurify.sanitize(username.value)
   });
 
   socket.emit('message', {
-    username: username.value,
-    message: message.value,
+    username: DOMPurify.sanitize(username.value),
+    message: DOMPurify.sanitize(message.value),
   });
 
   message.value = '';
@@ -27,12 +30,12 @@ message.addEventListener('input', () => {
   clearTimeout(timeoutID);
 
   socket.emit('typing', {
-    username: username.value
+    username: DOMPurify.sanitize(username.value)
   });
 
   timeoutID = setTimeout(() => {
     socket.emit('notTyping', {
-      username: username.value // not necessary
+      username: DOMPurify.sanitize(username.value) // not necessary
     });
   }, 1000);
 
@@ -45,13 +48,13 @@ message.addEventListener('input', () => {
 socket.on('message', data => {
   startTheConversation.style.display = 'none';
   messages.innerHTML = `
-    <p><span class="username">${data.username}: </span>${data.message}</p>
+    <p><span class="username">${DOMPurify.sanitize(data.username)}: </span>${DOMPurify.sanitize(data.message)}</p>
     ${messages.innerHTML}
   `;
 });
 
 socket.on('typing', data => {
-  typing.innerText = `${data.username} is typing...`;
+  typing.innerText = `${DOMPurify.sanitize(data.username)} is typing...`;
 });
 
 socket.on('notTyping', data => {
