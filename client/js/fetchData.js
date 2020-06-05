@@ -40,11 +40,10 @@ messages.onscroll = ( () => {
         if (lastRect.top <= (messagesRect.bottom + (messagesRect.height / 2))) {
           // get more messages
           getMoreMessages(last.dataset.createdat);
-          throttledInfiniteScrollingTimeoutID = null;
-
-        } else {
-          throttledInfiniteScrollingTimeoutID = null;
         }
+
+        throttledInfiniteScrollingTimeoutID = null;
+
       }, 500);
     }
   };

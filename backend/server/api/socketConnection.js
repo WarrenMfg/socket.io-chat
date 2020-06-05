@@ -6,6 +6,7 @@ export default server => {
 
   io.on('connection', (socket) => {
 
+    // message
     socket.on('message', async data => {
       try {
         const message = await Message.create(data);
@@ -19,6 +20,7 @@ export default server => {
       }
     });
 
+    // typing
     socket.on('typing', data => {
       socket.broadcast.emit('typing', data);
     });
