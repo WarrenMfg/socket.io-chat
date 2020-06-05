@@ -1,14 +1,5 @@
 const socket = io();
-const typing = document.getElementById('typing');
-const messages = document.getElementById('messages');
-const startTheConversation = document.getElementById('start-the-conversation');
-const username = document.getElementById('username');
-const message = document.getElementById('message');
-const button = document.getElementById('button');
 let timeoutID;
-
-// DOMpurify config
-DOMPurify.setConfig({ALLOWED_TAGS: []});
 
 
 // emit events
@@ -46,7 +37,6 @@ message.addEventListener('input', () => {
 
 // listen for events
 socket.on('message', data => {
-  startTheConversation.style.display = 'none';
   messages.innerHTML = `
     <p><span class="username">${DOMPurify.sanitize(data.username)}: </span>${DOMPurify.sanitize(data.message)}</p>
     ${messages.innerHTML}
