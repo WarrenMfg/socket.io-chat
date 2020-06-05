@@ -4,17 +4,19 @@ let timeoutID;
 
 // emit events
 button.addEventListener('click', () => {
-  clearTimeout(timeoutID);
-  socket.emit('notTyping', {
-    username: DOMPurify.sanitize(username.value)
-  });
+  if (username.value && message.value) {
+    clearTimeout(timeoutID);
+    socket.emit('notTyping', {
+      username: DOMPurify.sanitize(username.value)
+    });
 
-  socket.emit('message', {
-    username: DOMPurify.sanitize(username.value),
-    message: DOMPurify.sanitize(message.value),
-  });
+    socket.emit('message', {
+      username: DOMPurify.sanitize(username.value),
+      message: DOMPurify.sanitize(message.value),
+    });
 
-  message.value = '';
+    message.value = '';
+  }
 });
 
 message.addEventListener('input', () => {
@@ -38,7 +40,7 @@ message.addEventListener('input', () => {
 // listen for events
 socket.on('message', data => {
   messages.innerHTML = `
-    <p><span class="username">${DOMPurify.sanitize(data.username)}: </span>${DOMPurify.sanitize(data.message)}</p>
+    <p data-createdat=${message.createdAt}><span class="username">${DOMPurify.sanitize(data.username)}: </span>${DOMPurify.sanitize(data.message)}</p>
     ${messages.innerHTML}
   `;
 });

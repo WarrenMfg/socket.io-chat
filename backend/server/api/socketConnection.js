@@ -14,9 +14,7 @@ export default server => {
           io.sockets.emit('message', message);
         }
 
-
       } catch (err) {
-
         console.error(err);
       }
     });

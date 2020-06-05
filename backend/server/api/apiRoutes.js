@@ -1,14 +1,18 @@
 import { Router } from 'express';
 import {
-  getDataOnLoad
+  getMessagesOnLoad,
+  getMoreMessages
 } from './api';
 
 const apiRouter = Router();
 
 
 // dataOnLoad
-apiRouter.route('/dataOnLoad')
-  .get(getDataOnLoad);
+apiRouter.route('/messagesOnLoad')
+  .get(getMessagesOnLoad);
+
+apiRouter.route('/getMoreMessages/:last')
+  .get(getMoreMessages);
 
 
 
