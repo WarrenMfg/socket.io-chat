@@ -2,11 +2,12 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  padding: 1rem 0;
   height: 100vh;
 }
 
 header {
-  margin-bottom: 0.5em;
+  margin-bottom: 0.5rem;
 }
 
 h1 {
@@ -22,7 +23,7 @@ h1 {
 }
 
 #messages {
-  height: 50vh;
+  height: 40vh;
   background: #f0f0f0a6;
   overflow-y: scroll;
   padding: 1em;
