@@ -1,5 +1,5 @@
 import socket from 'socket.io';
-import Message from '../../database/messageModel';
+import Message from '../../database/models/Message';
 
 export default server => {
   const io = socket(server);

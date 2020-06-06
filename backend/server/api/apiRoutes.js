@@ -7,7 +7,9 @@ import {
 const apiRouter = Router();
 
 
-// dataOnLoad
+// apiRouter.route('/rooms')
+//   .get(getUsersRooms);
+
 apiRouter.route('/messagesOnLoad')
   .get(getMessagesOnLoad);
 

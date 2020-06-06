@@ -1,4 +1,4 @@
-import Message from '../../database/messageModel';
+import Message from '../../database/models/Message';
 
 const global$limit = 20;
 
