@@ -42,7 +42,7 @@ class Landing extends Component {
         this.props.addUserToState(user.user);
 
         // push to user's namespace
-        this.props.history.push(`/${user.username}`);
+        this.props.history.push(`/${user.user.username}`);
       })
       .catch(console.log);
   }

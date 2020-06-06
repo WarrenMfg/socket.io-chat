@@ -3,7 +3,11 @@ import mongoose from 'mongoose';
 
 const RoomSchema = new mongoose.Schema(
   {
-    room: {
+    roomname: {
+      type: String,
+      required: true
+    },
+    roomId: {
       type: mongoose.ObjectId,
       required: true
     },

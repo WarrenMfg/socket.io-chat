@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   register,
   login,
+  getLoggedInUser,
   getMessagesOnLoad,
   getMoreMessages
 } from './api';
@@ -16,6 +17,9 @@ apiRouter.route('/register')
 apiRouter.route('/login')
   // .all(validate)
   .post(login);
+
+apiRouter.route('/getLoggedInUser')
+  .get(getLoggedInUser);
 
 
 // apiRouter.route('/rooms')

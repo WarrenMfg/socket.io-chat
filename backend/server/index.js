@@ -5,6 +5,8 @@ import jwtDecode from 'jwt-decode';
 import apiRoutes from './api/apiRoutes';
 import { connect } from '../database/index';
 import socketConnection from './api/socketConnection';
+import { resolve } from 'path';
+import { secret } from '../config/config';
 
 
 // setup
@@ -18,7 +20,7 @@ app.use(morgan('dev', {
 }));
 
 app.use(express.json());
-/*
+
 app.use((req, res, next) => {
   try {
     if (req.headers?.authorization?.split(' ')[0] === 'Bearer') {
@@ -38,13 +40,18 @@ app.use((req, res, next) => {
       req.user = undefined;
       next();
     }
-  } catch (e) {
-    res.sendStatus(400);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
 });
-*/
+
 app.use('/api', apiRoutes);
 app.use(express.static('client/public'));
+
+// for react-router-dom URLs on refresh
+app.get('*', (req, res) => {
+  res.sendFile(resolve(__dirname, '../../client/public/index.html'));
+});
 
 
 // database and server

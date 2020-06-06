@@ -76,7 +76,7 @@ export const login = async (req, res) => {
       } else {
         const payload = {
           _id: loggedInUser._id,
-          username: loggedInUser.userName,
+          username: loggedInUser.username,
         };
 
         jwt.sign(payload, secret, { expiresIn }, (err, token) => {
@@ -87,6 +87,30 @@ export const login = async (req, res) => {
           }
         });
       }
+    }
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+export const getLoggedInUser = async (req, res) => {
+  try {
+    if (req.user) {
+      // get user by username
+      const user = await User.findOne({ username: req.user.username }).lean().exec();
+
+      // if no user exists
+      if (!user) {
+        return res.status(401).json({ message: 'Authentication failed. Wrong username or password.' });
+      }
+
+      return res.send(user);
+
+    // invalid or no JWT
+    } else {
+      return res.status(401).json({ message: 'Authentication failed. Please log in.' });
     }
 
   } catch (err) {

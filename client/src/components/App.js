@@ -4,6 +4,7 @@ import { Route, Switch, Redirect } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
 import Namespace from './Namespace';
 import Landing from './Landing';
+import { getHeaders } from '../utils/utils';
 
 
 // Check for token on refresh
@@ -27,6 +28,24 @@ class App extends Component {
     this.addUserToState = this.addUserToState.bind(this);
   }
 
+  componentDidMount() {
+    if (localStorage.token) {
+      try {
+        jwtDecode(localStorage.token.split(' ')[1]);
+
+        fetch('/api/getLoggedInUser', {
+          headers: getHeaders()
+        })
+          .then(res => res.json())
+          .then(user => this.setState({ user }))
+          .catch(console.log);
+
+      } catch (err) {
+        console.log(err.message);
+      }
+    }
+  }
+
   addUserToState(user) {
     this.setState({ user });
   }
@@ -39,9 +58,8 @@ class App extends Component {
         </header>
 
         <Switch>
-          {/* <Route exact path='/'><Landing addUserToState={this.addUserToState} /></Route> */}
           <Route exact path='/' render={props => <Landing {...props} addUserToState={this.addUserToState} />} />
-          <PrivateRoute exact path='/:id' component={Namespace} user={this.state.user} />
+          <PrivateRoute exact path='/:username' component={Namespace} user={this.state.user} />
         </Switch>
       </div>
     )
