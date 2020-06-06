@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 
 const UserSchema = new mongoose.Schema(
   {
-    username: {
+    username: { // username and namespace
       type: String,
       required: true
     },
@@ -15,7 +15,14 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       required: true,
       default: false
-    }
+    },
+    rooms: [ // created and joined
+      {
+        type: mongoose.ObjectId,
+        ref: 'Room',
+        required: true
+      }
+    ]
   },
   {
     timestamps: true

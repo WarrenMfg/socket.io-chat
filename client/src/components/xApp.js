@@ -143,9 +143,6 @@ class App extends React.Component {
   render() {
     return (
       <div className="container">
-        <header>
-          <h1>Socketman Chat</h1>
-        </header>
 
         <small id="typing">&nbsp;</small>
         <div id="messages"></div>
