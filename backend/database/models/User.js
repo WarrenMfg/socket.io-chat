@@ -16,11 +16,10 @@ const UserSchema = new mongoose.Schema(
       required: true,
       default: false
     },
-    rooms: [ // created and joined
+    memberOf: [
       {
         type: mongoose.ObjectId,
-        ref: 'Room',
-        required: true
+        ref: 'Room'
       }
     ]
   },

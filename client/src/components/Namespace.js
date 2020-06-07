@@ -8,9 +8,11 @@ class Namespace extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      user: this.props.user, // seed data to be controlled by Namespace component
       message: '',
       room: '',
-      notTypingTimeoutID: null
+      notTypingTimeoutID: null,
+      chatIdSelected: true
     };
 
     this.socket = io();
@@ -21,6 +23,7 @@ class Namespace extends Component {
     this.handleSendMessage = this.handleSendMessage.bind(this);
     this.handleLogout = this.handleLogout.bind(this);
     this.handleRadioInputChange = this.handleRadioInputChange.bind(this);
+    this.handleAddJoin = this.handleAddJoin.bind(this);
   }
 
 
@@ -104,7 +107,7 @@ class Namespace extends Component {
     clearTimeout(this.state.notTypingTimeoutID);
 
     this.socket.emit('typing', {
-      username: DOMPurify.sanitize(this.props.user.username),
+      username: DOMPurify.sanitize(this.state.user.username),
       room: DOMPurify.sanitize(this.state.room)
     });
 
@@ -122,6 +125,8 @@ class Namespace extends Component {
 
   handleRoomChange(e) {
 
+
+    // change radio input to Chat ID
   }
 
 
@@ -135,6 +140,36 @@ class Namespace extends Component {
     document.querySelector('label.active').classList.remove('active');
     e.target.parentElement.classList.add('active');
     document.querySelector('input#radioInput').placeholder = placeholders[e.target.id];
+
+    e.target.id === 'chatId' ? this.setState({ chatIdSelected: true }) : this.setState({ chatIdSelected: false });
+  }
+
+
+  handleAddJoin(e) {
+    const radioInput = document.querySelector('#radioInput');
+    const action = document.querySelector('input[type="radio"]:checked').id;
+
+    if (action === 'addNew') this.addNew(radioInput.value);
+    else this.joinNew(radioInput.value);
+
+    radioInput.value = '';
+  }
+
+
+  addNew(roomname) {
+    fetch('/api/addNewRoom', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ roomname, userId: this.state.user._id })
+    })
+      .then(res => res.json())
+      .then(user => this.setState({ user }))
+      .catch(console.log);
+  }
+
+
+  joinNew(chatId) {
+
   }
 
 
@@ -147,7 +182,7 @@ class Namespace extends Component {
       });
 
       this.socket.emit('message', {
-        username: DOMPurify.sanitize(this.props.user.username),
+        username: DOMPurify.sanitize(this.state.user.username),
         message: DOMPurify.sanitize(this.state.message),
         room: DOMPurify.sanitize(this.state.room)
       });
@@ -188,44 +223,32 @@ class Namespace extends Component {
         <div className="list-group">
           <select className="custom-select mb-3" id="namespace-room">
             <option defaultValue value=''>Choose a chat room</option>
-            {this.props.user.rooms.map(room => (
-              <option key={room._id} value={room.roomId}>{room.name}</option>
+            {this.state.user.memberOf.map(room => (
+              <option key={room._id} value={room._id}>{room.roomname}</option>
             ))}
           </select>
 
-          {/* <div className="input-group mb-3">
-            <input id="add-chat-room" type="text" className="form-control" placeholder="Enter a chat room name" />
-            <div className="input-group-append">
-              <button className="btn btn-outline-secondary" type="button" id="button-addon2">Add</button>
-            </div>
-          </div>
-
-          <div className="input-group mb-3">
-            <input id="join-chat-room" type="text" className="form-control" placeholder="Enter chat room ID" />
-            <div className="input-group-append">
-              <button className="btn btn-outline-secondary" type="button" id="button-addon2">Join</button>
-            </div>
-          </div> */}
-
           <div className="btn-group btn-group-toggle" data-toggle="buttons">
             <label className="btn btn-secondary active">
-              <input type="radio" name="options" id="chatId" onChange={this.handleRadioInputChange} /> Chat ID
+              <input type="radio" name="options" id="chatId" onChange={this.handleRadioInputChange} />Chat ID
             </label>
 
             <label className="btn btn-secondary">
-              <input type="radio" name="options" id="addNew" onChange={this.handleRadioInputChange} /> Add New
+              <input type="radio" name="options" id="addNew" onChange={this.handleRadioInputChange} />Add New
             </label>
 
             <label className="btn btn-secondary">
-              <input type="radio" name="options" id="joinNew" onChange={this.handleRadioInputChange} /> Join New
+              <input type="radio" name="options" id="joinNew" onChange={this.handleRadioInputChange} />Join New
             </label>
           </div>
 
           <div className="input-group mb-3">
             <input id="radioInput" type="text" className="form-control" placeholder="Choose a chat room to view ID" />
-            <div className="input-group-append">
-              <button className="btn btn-outline-secondary" type="button" id="button-addon2">Submit</button>
-            </div>
+            {!this.state.chatIdSelected &&
+              <div className="input-group-append">
+                <button className="btn btn-outline-secondary" type="button" onClick={this.handleAddJoin}>Submit</button>
+              </div>
+            }
           </div>
 
         </div>

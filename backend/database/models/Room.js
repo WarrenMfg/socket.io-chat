@@ -7,13 +7,8 @@ const RoomSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    roomId: {
-      type: mongoose.ObjectId,
-      required: true
-    },
     createdBy: {
       type: mongoose.ObjectId,
-      ref: 'User',
       required: true
     }
   },

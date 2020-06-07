@@ -3,6 +3,7 @@ import {
   register,
   login,
   getLoggedInUser,
+  addNewRoom,
   logout,
   getMessagesOnLoad,
   getMoreMessages
@@ -24,6 +25,9 @@ apiRouter.route('/logout')
 
 apiRouter.route('/getLoggedInUser')
   .get(getLoggedInUser);
+
+apiRouter.route('/addNewRoom')
+  .post(addNewRoom);
 
 
 // apiRouter.route('/rooms')

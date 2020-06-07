@@ -1,5 +1,7 @@
 import Message from '../../database/models/Message';
 import User from '../../database/models/User';
+import Room from '../../database/models/Room';
+import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { secret, expiresIn } from '../../config/config';
@@ -67,23 +69,27 @@ export const login = async (req, res) => {
 
     // if passwordIsValid
     if (passwordIsValid) {
-      const loggedInUser = await User.findOneAndUpdate({ username: req.body.username }, { isLoggedIn: true }, { new: true }).lean().exec();
+      const loggedInUser = await User.findOneAndUpdate({ username: req.body.username }, { isLoggedIn: true }, { new: true });
 
       if (!loggedInUser) {
         return res.status(500).json({ message: 'Could not log in user.' });
 
       // send token
       } else {
+        // populate memberOf
+        const populated = await loggedInUser.execPopulate('memberOf');
+        populated.password = undefined;
+
         const payload = {
-          _id: loggedInUser._id,
-          username: loggedInUser.username,
+          _id: populated._id,
+          username: populated.username,
         };
 
         jwt.sign(payload, secret, { expiresIn }, (err, token) => {
           if (err) {
             return res.status(500).json({ message: 'Could not log in user.' });
           } else {
-            return res.send({ token: `Bearer ${token}`, user: {...loggedInUser, password: undefined} });
+            return res.send({ token: `Bearer ${token}`, user: populated });
           }
         });
       }
@@ -99,19 +105,51 @@ export const getLoggedInUser = async (req, res) => {
   try {
     if (req.user) {
       // get user by username
-      const user = await User.findOne({ username: req.user.username }).lean().exec();
+      const user = await User.findOne({ username: req.user.username });
 
       // if no user exists
       if (!user) {
         return res.status(401).json({ message: 'Authentication failed. Wrong username or password.' });
       }
 
-      return res.send(user);
+      // populate memberOf
+      const populated = await user.execPopulate('memberOf');
+      populated.password = undefined;
+
+      return res.send(populated);
 
     // invalid or no JWT
     } else {
       return res.status(401).json({ message: 'Authentication failed. Please log in.' });
     }
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+export const addNewRoom = async (req, res) => {
+  try {
+    const newRoom = await Room.create({
+      roomname: req.body.roomname,
+      createdBy: req.body.userId
+    });
+
+    if (!newRoom) {
+      return res.status(500).json({ message: 'Could not add new room.' });
+    }
+
+    // update user
+    const user = await User.findOne({ username: req.user.username });
+    user.memberOf.push(newRoom._id);
+    const updatedUser = await user.save();
+
+    // populate memberOf
+    const populated = await updatedUser.execPopulate('memberOf');
+    populated.password = undefined;
+
+    return res.send(populated);
 
   } catch (err) {
     res.status(500).json({ message: err.message });
