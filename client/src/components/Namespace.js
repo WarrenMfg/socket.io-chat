@@ -157,7 +157,6 @@ class Namespace extends Component {
           </select>
 
           <div className="input-group mb-3">
-            {/* <label htmlFor="add-chat-room">Add another chat room</label> */}
             <input id="add-chat-room" type="text" className="form-control" placeholder="Enter a chat room name" />
             <div className="input-group-append">
               <button className="btn btn-outline-secondary" type="button" id="button-addon2">Add</button>
@@ -165,7 +164,6 @@ class Namespace extends Component {
           </div>
 
           <div className="input-group mb-3">
-            {/* <label htmlFor="join-chat-room">Join another chat room</label> */}
             <input id="join-chat-room" type="text" className="form-control" placeholder="Enter chat room ID" />
             <div className="input-group-append">
               <button className="btn btn-outline-secondary" type="button" id="button-addon2">Join</button>
