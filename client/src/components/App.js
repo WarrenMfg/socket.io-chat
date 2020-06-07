@@ -1,22 +1,11 @@
 import React, { Component } from 'react';
 import jwtDecode from 'jwt-decode';
-import { Route, Switch, Redirect } from 'react-router-dom';
+import { Route, Switch, withRouter } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
 import Namespace from './Namespace';
 import Landing from './Landing';
 import { getHeaders } from '../utils/utils';
 
-
-// Check for token on refresh
-// if (localStorage.token) {
-//   try {
-//     jwtDecode(localStorage.token.split(' ')[1]); // will throw if invalid
-//     <Redirect  />
-
-//   } catch (err) {
-//     console.log(err);
-//   }
-// }
 
 class App extends Component {
   constructor(props) {
@@ -28,6 +17,7 @@ class App extends Component {
     this.addUserToState = this.addUserToState.bind(this);
   }
 
+
   componentDidMount() {
     if (localStorage.token) {
       try {
@@ -37,7 +27,10 @@ class App extends Component {
           headers: getHeaders()
         })
           .then(res => res.json())
-          .then(user => this.setState({ user }))
+          .then(user => {
+            this.setState({ user });
+            this.props.history.push(`/${user.username}`);
+          })
           .catch(console.log);
 
       } catch (err) {
@@ -46,9 +39,11 @@ class App extends Component {
     }
   }
 
+
   addUserToState(user) {
     this.setState({ user });
   }
+
 
   render() {
     return (
@@ -66,4 +61,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default withRouter(App);

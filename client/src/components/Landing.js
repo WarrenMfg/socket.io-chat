@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { getHeaders } from '../utils/utils';
+import jwtDecode from 'jwt-decode';
 
 
 class Landing extends Component {
@@ -16,13 +17,16 @@ class Landing extends Component {
     this.handleSignup = this.handleSignup.bind(this);
   }
 
+
   handleInputChange(e) {
     this.setState({ [e.target.name]: e.target.value });
   }
 
+
   handleButton(e) {
     this.setState({ action: e.target.name});
   }
+
 
   handleLogin() {
     fetch('/api/login', {
@@ -47,6 +51,7 @@ class Landing extends Component {
       .catch(console.log);
   }
 
+
   handleSignup() {
     fetch('/api/register', {
       method: 'POST',
@@ -64,6 +69,7 @@ class Landing extends Component {
         }))
       .catch(console.log);
   }
+
 
   render() {
     return (
