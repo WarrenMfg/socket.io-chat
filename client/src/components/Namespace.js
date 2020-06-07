@@ -20,6 +20,7 @@ class Namespace extends Component {
     this.handleMessageChange = this.handleMessageChange.bind(this);
     this.handleSendMessage = this.handleSendMessage.bind(this);
     this.handleLogout = this.handleLogout.bind(this);
+    this.handleRadioInputChange = this.handleRadioInputChange.bind(this);
   }
 
 
@@ -124,6 +125,19 @@ class Namespace extends Component {
   }
 
 
+  handleRadioInputChange(e) {
+    const placeholders = {
+      chatId: 'Choose a chat room to view chat ID',
+      addNew: 'Enter a new chat room name',
+      joinNew: 'Enter a new chat ID'
+    };
+
+    document.querySelector('label.active').classList.remove('active');
+    e.target.parentElement.classList.add('active');
+    document.querySelector('input#radioInput').placeholder = placeholders[e.target.id];
+  }
+
+
   handleSendMessage() {
     if (this.state.message && this.state.room) {
       clearTimeout(this.state.notTypingTimeoutID);
@@ -179,7 +193,7 @@ class Namespace extends Component {
             ))}
           </select>
 
-          <div className="input-group mb-3">
+          {/* <div className="input-group mb-3">
             <input id="add-chat-room" type="text" className="form-control" placeholder="Enter a chat room name" />
             <div className="input-group-append">
               <button className="btn btn-outline-secondary" type="button" id="button-addon2">Add</button>
@@ -191,6 +205,24 @@ class Namespace extends Component {
             <div className="input-group-append">
               <button className="btn btn-outline-secondary" type="button" id="button-addon2">Join</button>
             </div>
+          </div> */}
+
+          <div className="btn-group btn-group-toggle" data-toggle="buttons">
+            <label className="btn btn-secondary active">
+              <input type="radio" name="options" id="chatId" onChange={this.handleRadioInputChange} /> Chat ID
+            </label>
+
+            <label className="btn btn-secondary">
+              <input type="radio" name="options" id="addNew" onChange={this.handleRadioInputChange} /> Add New
+            </label>
+
+            <label className="btn btn-secondary">
+              <input type="radio" name="options" id="joinNew" onChange={this.handleRadioInputChange} /> Join New
+            </label>
+          </div>
+
+          <div className="input-group mb-3">
+            <input type="text" id="radioInput" className="form-control" placeholder="Choose a chat room to view chat ID" />
           </div>
 
         </div>
