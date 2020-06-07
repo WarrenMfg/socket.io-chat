@@ -142,8 +142,7 @@ class Namespace extends Component {
 
         <form className="mb-3">
           <div className="form-group">
-            <label htmlFor="message">Message</label>
-            <textarea className="form-control" id="message" rows="2" value={this.state.message} onChange={this.handleMessageChange}></textarea>
+            <textarea className="form-control" id="message" rows="2" placeholder="Message..." value={this.state.message} onChange={this.handleMessageChange}></textarea>
           </div>
 
           <button id="button" onClick={this.handleSendMessage} type="button" className="btn btn-dark btn-lg btn-block">Send</button>
@@ -174,6 +173,8 @@ class Namespace extends Component {
           </div>
 
         </div>
+
+        <button type="button" className="btn btn-dark btn-lg btn-block">Logout</button>
 
       </div>
     )
