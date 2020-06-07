@@ -12,7 +12,7 @@ export default server => {
         const message = await Message.create(data);
 
         if (message) {
-          io.sockets.emit('message', message);
+          io.to(data.room).emit('message', message);
         }
 
       } catch (err) {
@@ -22,11 +22,11 @@ export default server => {
 
     // typing
     socket.on('typing', data => {
-      socket.broadcast.emit('typing', data);
+      socket.broadcast.to(data.room).emit('typing', data);
     });
 
     socket.on('notTyping', data => {
-      socket.broadcast.emit('notTyping', data);
+      socket.broadcast.to(data.room).emit('notTyping');
     });
 
   });

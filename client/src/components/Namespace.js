@@ -103,7 +103,8 @@ class Namespace extends Component {
     clearTimeout(this.state.notTypingTimeoutID);
 
     this.socket.emit('typing', {
-      username: DOMPurify.sanitize(this.props.user.username)
+      username: DOMPurify.sanitize(this.props.user.username),
+      room: DOMPurify.sanitize(this.state.room)
     });
 
     this.setState({
@@ -111,7 +112,7 @@ class Namespace extends Component {
 
       notTypingTimeoutID: setTimeout(() => {
         this.socket.emit('notTyping', {
-          username: DOMPurify.sanitize(this.props.user.username) // not necessary to send data
+          room: DOMPurify.sanitize(this.state.room)
         });
       }, 1000)
     });
@@ -128,7 +129,7 @@ class Namespace extends Component {
       clearTimeout(this.state.notTypingTimeoutID);
 
       this.socket.emit('notTyping', {
-        username: DOMPurify.sanitize(this.props.user.username) // not necessary to send data
+        room: DOMPurify.sanitize(this.state.room)
       });
 
       this.socket.emit('message', {

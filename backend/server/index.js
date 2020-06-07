@@ -1,7 +1,6 @@
 import express from 'express';
 import morgan from 'morgan';
 import jwt from 'jsonwebtoken';
-import jwtDecode from 'jwt-decode';
 import apiRoutes from './api/apiRoutes';
 import { connect } from '../database/index';
 import socketConnection from './api/socketConnection';
@@ -27,7 +26,6 @@ app.use((req, res, next) => {
       const token = req.headers.authorization.split(' ')[1];
       jwt.verify(token, secret, (err, decode) => {
         if (err) {
-          // req.expiredUser = jwtDecode(token);
           req.user = undefined;
         } else {
           // for loginRequired middleware
