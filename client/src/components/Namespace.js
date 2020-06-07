@@ -127,7 +127,7 @@ class Namespace extends Component {
 
   handleRadioInputChange(e) {
     const placeholders = {
-      chatId: 'Choose a chat room to view chat ID',
+      chatId: 'Choose a chat room to view ID',
       addNew: 'Enter a new chat room name',
       joinNew: 'Enter a new chat ID'
     };
@@ -222,7 +222,10 @@ class Namespace extends Component {
           </div>
 
           <div className="input-group mb-3">
-            <input type="text" id="radioInput" className="form-control" placeholder="Choose a chat room to view chat ID" />
+            <input id="radioInput" type="text" className="form-control" placeholder="Choose a chat room to view ID" />
+            <div className="input-group-append">
+              <button className="btn btn-outline-secondary" type="button" id="button-addon2">Submit</button>
+            </div>
           </div>
 
         </div>
