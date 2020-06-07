@@ -119,6 +119,24 @@ export const getLoggedInUser = async (req, res) => {
 };
 
 
+export const logout = async (req, res) => {
+  try {
+    const loggedOutUser = await User.findOneAndUpdate({ username: req.user.username }, { isLoggedIn: false }, { new: true }).lean().exec();
+
+    if (!loggedOutUser) {
+      return res.status(500).json({ message: 'Could not log out user.' });
+    }
+
+    return res.sendStatus(200);
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+
+
+};
+
+
 export const getMessagesOnLoad = async (req, res) => {
   try {
     const messages = await Message.aggregate([ { $sort: { createdAt: -1 } }, { $limit: global$limit } ]);

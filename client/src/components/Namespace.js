@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import io from 'socket.io-client';
 import DOMPurify from 'dompurify';
+import { getHeaders } from '../utils/utils';
 
 
 class Namespace extends Component {
@@ -8,6 +9,7 @@ class Namespace extends Component {
     super(props);
     this.state = {
       message: '',
+      room: '',
       notTypingTimeoutID: null
     };
 
@@ -17,6 +19,7 @@ class Namespace extends Component {
     this.getMoreMessages = this.getMoreMessages.bind(this);
     this.handleMessageChange = this.handleMessageChange.bind(this);
     this.handleSendMessage = this.handleSendMessage.bind(this);
+    this.handleLogout = this.handleLogout.bind(this);
   }
 
 
@@ -115,8 +118,13 @@ class Namespace extends Component {
   }
 
 
+  handleRoomChange(e) {
+
+  }
+
+
   handleSendMessage() {
-    if (this.state.message) {
+    if (this.state.message && this.state.room) {
       clearTimeout(this.state.notTypingTimeoutID);
 
       this.socket.emit('notTyping', {
@@ -126,10 +134,24 @@ class Namespace extends Component {
       this.socket.emit('message', {
         username: DOMPurify.sanitize(this.props.user.username),
         message: DOMPurify.sanitize(this.state.message),
+        room: DOMPurify.sanitize(this.state.room)
       });
 
       this.setState({ message: '' });
     }
+  }
+
+
+  handleLogout() {
+    fetch('/api/logout', {
+      method: 'POST',
+      headers: getHeaders()
+    })
+      .then(() => {
+        localStorage.removeItem('token');
+        this.props.history.push('/');
+      })
+      .catch(console.log);
   }
 
 
@@ -172,7 +194,7 @@ class Namespace extends Component {
 
         </div>
 
-        <button type="button" className="btn btn-dark btn-lg btn-block">Logout</button>
+        <button type="button" className="btn btn-dark btn-lg btn-block" onClick={this.handleLogout}>Logout</button>
 
       </div>
     )

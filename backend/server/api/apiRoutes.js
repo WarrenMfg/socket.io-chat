@@ -3,6 +3,7 @@ import {
   register,
   login,
   getLoggedInUser,
+  logout,
   getMessagesOnLoad,
   getMoreMessages
 } from './api';
@@ -17,6 +18,9 @@ apiRouter.route('/register')
 apiRouter.route('/login')
   // .all(validate)
   .post(login);
+
+apiRouter.route('/logout')
+  .post(logout);
 
 apiRouter.route('/getLoggedInUser')
   .get(getLoggedInUser);

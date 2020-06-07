@@ -8,7 +8,7 @@ const PrivateRoute = ({ component: Component, user, ...rest }) => {
     jwtDecode(localStorage.getItem('token').split(' ')[1]); // will throw if invalid
 
     if (user) {
-      return <Route {...rest}><Component user={user} /></Route>;
+      return <Route {...rest} render={props => <Component user={user} {...props} />} />;
     } else {
       return null;
     }
