@@ -157,6 +157,32 @@ export const addNewRoom = async (req, res) => {
 };
 
 
+export const joinNewRoom = async (req, res) => {
+  try {
+    // see if room exists
+    const room = await Room.findOne({ _id: req.body.chatId }).lean().exec();
+
+    if (!room) {
+      return res.status(500).json({ message: 'Could not find room by that chat ID.' });
+    }
+
+    // add room to memberOf property
+    const user = await User.findOne({ username: req.user.username });
+    user.memberOf.push(req.body.chatId);
+    const updatedUser = await user.save();
+
+    // populate memberOf
+    const populated = await updatedUser.execPopulate('memberOf');
+    populated.password = undefined;
+
+    return res.send(populated);
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
 export const logout = async (req, res) => {
   try {
     const loggedOutUser = await User.findOneAndUpdate({ username: req.user.username }, { isLoggedIn: false }, { new: true }).lean().exec();
@@ -175,15 +201,18 @@ export const logout = async (req, res) => {
 };
 
 
-export const getMessagesOnLoad = async (req, res) => {
+export const getMessagesOnRoomChange = async (req, res) => {
   try {
-    const messages = await Message.aggregate([ { $sort: { createdAt: -1 } }, { $limit: global$limit } ]);
+    const messages = await Message.aggregate([ { $match: { room: mongoose.Types.ObjectId(req.params.room) } }, { $sort: { createdAt: -1 } }, { $limit: global$limit } ]);
 
     if (!messages) {
       return res.json([]);
     }
 
-    return res.send(messages);
+    const populated = await Message
+      .populate(messages, [{path: 'room', model: 'Room', select: 'roomname'}, {path: 'username', model: 'User', select: 'username'}]);
+
+    return res.send(populated);
 
   } catch (err) {
     return res.status(500).json(err.message);

@@ -4,8 +4,9 @@ import {
   login,
   getLoggedInUser,
   addNewRoom,
+  joinNewRoom,
   logout,
-  getMessagesOnLoad,
+  getMessagesOnRoomChange,
   getMoreMessages
 } from './api';
 
@@ -29,12 +30,11 @@ apiRouter.route('/getLoggedInUser')
 apiRouter.route('/addNewRoom')
   .post(addNewRoom);
 
+apiRouter.route('/joinNewRoom')
+  .post(joinNewRoom);
 
-// apiRouter.route('/rooms')
-//   .get(getUsersRooms);
-
-apiRouter.route('/messagesOnLoad')
-  .get(getMessagesOnLoad);
+apiRouter.route('/getMessagesOnRoomChange/:room')
+  .get(getMessagesOnRoomChange);
 
 apiRouter.route('/getMoreMessages/:last')
   .get(getMoreMessages);
