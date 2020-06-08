@@ -7,7 +7,10 @@ export default server => {
   io.on('connection', (socket) => {
     // join
     socket.on('join', data => {
+      // leave
       socket.leave(data.previousRoom);
+      io.to(data.previousRoom).emit('leaveMessage', { username: data.username });
+      // join
       if (data.currentRoom) {
         socket.join(data.currentRoom);
         io.to(data.currentRoom).emit('joinMessage', { username: data.username });
@@ -18,7 +21,6 @@ export default server => {
     socket.on('message', async data => {
       try {
         const message = await Message.create(data);
-
 
         if (message) {
           const populated = await message.execPopulate('room username');

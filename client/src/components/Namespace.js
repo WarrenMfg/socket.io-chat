@@ -44,6 +44,14 @@ class Namespace extends Component {
         `;
     });
 
+    // on someone else leaving
+    this.socket.on('leaveMessage', data => {
+      messages.innerHTML = `
+          <p>${DOMPurify.sanitize(data.username)} left the room.</p>
+          ${messages.innerHTML}
+        `;
+    });
+
     // listen for message
     this.socket.on('message', data => {
       messages.innerHTML = `
@@ -99,8 +107,8 @@ class Namespace extends Component {
         return;
       }
 
-        // join room
-        this.socket.emit('join', { previousRoom: prevState.chatId, currentRoom: this.state.chatId, username: this.state.user.username });
+      // join room
+      this.socket.emit('join', { previousRoom: prevState.chatId, currentRoom: this.state.chatId, username: this.state.user.username });
 
 
       // fetch messages on load
@@ -161,6 +169,14 @@ class Namespace extends Component {
     const radioInput = document.querySelector('#radioInput');
     radioInput.value = e.target.value;
     this.setState({ chatId: e.target.value, chatIdSelected: true });
+
+    // enable/disable message textarea
+    const message = document.querySelector('#message');
+    if (e.target.value) {
+      message.disabled = false;
+    } else {
+      message.disabled = true;
+    }
   }
 
 
@@ -257,7 +273,7 @@ class Namespace extends Component {
 
         <form className="mb-3">
           <div className="form-group">
-            <textarea className="form-control" id="message" rows="2" placeholder="Message..." value={this.state.message} onChange={this.handleMessageChange}></textarea>
+            <textarea className="form-control" id="message" rows="2" placeholder="Message..." value={this.state.message} onChange={this.handleMessageChange} disabled></textarea>
           </div>
 
           <button id="button" onClick={this.handleSendMessage} type="button" className="btn btn-dark btn-lg btn-block">Send</button>
