@@ -1,5 +1,5 @@
 import express from 'express';
-import morgan from 'morgan';
+// import morgan from 'morgan';
 import jwt from 'jsonwebtoken';
 import jwtDecode from 'jwt-decode';
 import apiRoutes from './api/apiRoutes';
@@ -15,9 +15,9 @@ const PORT = process.env.PORT || 5000;
 app.disable('x-powered-by');
 
 // middleware
-app.use(morgan('dev', {
-  skip: req => ['/meta/site.webmanifest', '/meta/favicon-32x32.png', '/bundle.js'].includes(req.url)
-}));
+// app.use(morgan('dev', {
+//   skip: req => ['/meta/site.webmanifest', '/meta/favicon-32x32.png', '/bundle.js'].includes(req.url)
+// }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

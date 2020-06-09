@@ -10,7 +10,8 @@
     "buildBackend": "npx babel backend --out-dir dist",
     "watchBackend": "npx babel backend --watch --out-dir dist",
     "startDev": "nodemon dist/server/index.js",
-    "start": "node dist/server/index.js"
+    "start": "node dist/server/index.js",
+    "build": "npm run buildFrontend && npm run buildBackend"
   },
   "nodemonConfig": {
     "watch": [
@@ -47,5 +48,9 @@
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.2.0",
     "socket.io": "^2.3.0"
+  },
+  "engines": {
+    "node": "12.x",
+    "npm": "6.x"
   }
 }
