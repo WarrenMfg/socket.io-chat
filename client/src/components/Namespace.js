@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import io from 'socket.io-client';
 import DOMPurify from 'dompurify';
-import { getHeaders } from '../utils/utils';
+import { getHeaders, handleErrors } from '../utils/utils';
 
 
 class Namespace extends Component {
@@ -109,7 +109,11 @@ class Namespace extends Component {
 
 
       // fetch messages on load
-      fetch(`/api/getMessagesOnRoomChange/${this.state.chatId}`)
+      fetch(`/api/getMessagesOnRoomChange/${this.state.chatId}`, {
+        method: 'GET',
+        headers: getHeaders()
+      })
+        .then(handleErrors)
         .then(res => res.json())
         .then(data => {
           messages.innerHTML = '';
@@ -117,7 +121,14 @@ class Namespace extends Component {
             <p data-createdat=${message.createdAt}><span class="username">${DOMPurify.sanitize(message.username.username)}: </span>${DOMPurify.sanitize(message.message)}</p>
           `);
         })
-        .catch(console.log);
+        .catch(err => {
+          if (err.unauthorized || err.expiredUser) {
+            localStorage.removeItem('token');
+            this.props.history.push('/');
+          } else {
+            console.log(err.message);
+          }
+        });
     }
   }
 
@@ -125,14 +136,25 @@ class Namespace extends Component {
   getMoreMessages(last) {
     const messages = document.getElementById('messages');
 
-    fetch(`/api/getMoreMessages/${last}`)
+    fetch(`/api/getMoreMessages/${last}`, {
+      method: 'GET',
+      headers: getHeaders()
+    })
+      .then(handleErrors)
       .then(res => res.json())
       .then(data => {
         data.forEach(message => messages.innerHTML += `
           <p data-createdat=${message.createdAt}><span class="username">${DOMPurify.sanitize(message.username)}: </span>${DOMPurify.sanitize(message.message)}</p>
         `);
       })
-      .catch(console.log);
+      .catch(err => {
+        if (err.unauthorized || err.expiredUser) {
+          localStorage.removeItem('token');
+          this.props.history.push('/');
+        } else {
+          console.log(err.message);
+        }
+      });
   }
 
 
@@ -211,9 +233,17 @@ class Namespace extends Component {
       headers: getHeaders(),
       body: JSON.stringify({ roomname, userId: this.state.user._id })
     })
+      .then(handleErrors)
       .then(res => res.json())
       .then(user => this.setState({ user }))
-      .catch(console.log);
+      .catch(err => {
+        if (err.unauthorized || err.expiredUser) {
+          localStorage.removeItem('token');
+          this.props.history.push('/');
+        } else {
+          console.log(err.message);
+        }
+      });
   }
 
 
@@ -223,9 +253,17 @@ class Namespace extends Component {
       headers: getHeaders(),
       body: JSON.stringify({ chatId })
     })
+      .then(handleErrors)
       .then(res => res.json())
       .then(user => this.setState({ user }))
-      .catch(console.log);
+      .catch(err => {
+        if (err.unauthorized || err.expiredUser) {
+          localStorage.removeItem('token');
+          this.props.history.push('/');
+        } else {
+          console.log(err.message);
+        }
+      });
   }
 
 
@@ -253,11 +291,19 @@ class Namespace extends Component {
       method: 'POST',
       headers: getHeaders()
     })
+      .then(handleErrors)
       .then(() => {
         localStorage.removeItem('token');
         this.props.history.push('/');
       })
-      .catch(console.log);
+      .catch(err => {
+        if (err.unauthorized || err.expiredUser) {
+          localStorage.removeItem('token');
+          this.props.history.push('/');
+        } else {
+          console.log(err.message);
+        }
+      });
   }
 
 

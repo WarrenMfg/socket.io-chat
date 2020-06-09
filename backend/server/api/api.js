@@ -114,6 +114,37 @@ export const login = async (req, res) => {
 };
 
 
+export const loginRequired = async (req, res, next) => {
+  try {
+    // if JWT is verified (not expired)
+    if (req.user) {
+      // see if user is a valid user (e.g. not a deleted account)
+      const validUser = await User.findOne({ _id: req.user._id, username: req.user.username }).lean().exec();
+
+      // if no validUser (e.g. deleted account) or is validUser but not logged in
+      if (!validUser || !validUser.isLoggedIn) {
+        return res.status(401).json({ unauthorized: true });
+      // otherwise, if validUser and isLoggedIn
+      } else {
+        next();
+      }
+
+    // otherwise, JWT is not verified (e.g. expired)
+    } else if (req.expiredUser) {
+      await User.findOneAndUpdate({ _id: req.expiredUser._id, username: req.expiredUser.username }, { isLoggedIn: false }, { new: true }).lean().exec()
+        .then( () => res.status(401).json({ expiredUser: true }) )
+        .catch( err => res.status(500).json({ message: err.message }) )
+
+    } else {
+      return res.status(401).json({ unauthorized: true });
+    }
+
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+
 export const getLoggedInUser = async (req, res) => {
   try {
     if (req.user) {

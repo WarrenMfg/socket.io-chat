@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   register,
   login,
+  loginRequired,
   getLoggedInUser,
   addNewRoom,
   joinNewRoom,
@@ -14,29 +15,33 @@ const apiRouter = Router();
 
 
 apiRouter.route('/register')
-  // .all(validate)
   .post(register);
 
 apiRouter.route('/login')
-  // .all(validate)
   .post(login);
 
 apiRouter.route('/logout')
+  .all(loginRequired)
   .post(logout);
 
 apiRouter.route('/getLoggedInUser')
+  .all(loginRequired)
   .get(getLoggedInUser);
 
 apiRouter.route('/addNewRoom')
+  .all(loginRequired)
   .post(addNewRoom);
 
 apiRouter.route('/joinNewRoom')
+  .all(loginRequired)
   .post(joinNewRoom);
 
 apiRouter.route('/getMessagesOnRoomChange/:room')
+  .all(loginRequired)
   .get(getMessagesOnRoomChange);
 
 apiRouter.route('/getMoreMessages/:last')
+  .all(loginRequired)
   .get(getMoreMessages);
 
 
