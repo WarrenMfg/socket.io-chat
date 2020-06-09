@@ -30,7 +30,11 @@ class Landing extends Component {
 
 
   handleButton(e) {
-    this.setState({ action: e.target.name});
+    this.setState({
+      action: e.target.name,
+      usernameFeedback: '\xa0',
+      passwordFeedback: '\xa0'
+    });
   }
 
 

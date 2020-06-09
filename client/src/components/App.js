@@ -5,7 +5,7 @@ import DOMPurify from 'dompurify';
 import PrivateRoute from './PrivateRoute';
 import Namespace from './Namespace';
 import Landing from './Landing';
-import { getHeaders } from '../utils/utils';
+import { getHeaders, handleErrors } from '../utils/utils';
 
 
 class App extends Component {
@@ -31,12 +31,20 @@ class App extends Component {
         fetch('/api/getLoggedInUser', {
           headers: getHeaders()
         })
+          .then(handleErrors)
           .then(res => res.json())
           .then(user => {
             this.setState({ user });
             this.props.history.push(`/${user.username}`);
           })
-          .catch(console.log);
+          .catch(err => {
+            if (err.unauthorized || err.expiredUser) {
+              localStorage.removeItem('token');
+              this.props.history.push('/');
+            } else {
+              console.log(err.message);
+            }
+          });
 
       } catch (err) {
         console.log(err.message);

@@ -40,7 +40,7 @@ apiRouter.route('/getMessagesOnRoomChange/:room')
   .all(loginRequired)
   .get(getMessagesOnRoomChange);
 
-apiRouter.route('/getMoreMessages/:last')
+apiRouter.route('/getMoreMessages/:room/:last')
   .all(loginRequired)
   .get(getMoreMessages);
 

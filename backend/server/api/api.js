@@ -147,25 +147,19 @@ export const loginRequired = async (req, res, next) => {
 
 export const getLoggedInUser = async (req, res) => {
   try {
-    if (req.user) {
-      // get user by username
-      const user = await User.findOne({ username: req.user.username });
+    // get user by username
+    const user = await User.findOne({ _id: req.user._id, username: req.user.username });
 
-      // if no user exists
-      if (!user) {
-        return res.status(401).json({ message: 'Authentication failed. Wrong username or password.' });
-      }
-
-      // populate memberOf
-      const populated = await user.execPopulate('memberOf');
-      populated.password = undefined;
-
-      return res.send(populated);
-
-    // invalid or no JWT
-    } else {
-      return res.status(401).json({ message: 'Authentication failed. Please log in.' });
+    // if no user exists
+    if (!user) {
+      return res.status(401).json({ unauthorized: true });
     }
+
+    // populate memberOf
+    const populated = await user.execPopulate('memberOf');
+    populated.password = undefined;
+
+    return res.send(populated);
 
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -177,7 +171,7 @@ export const addNewRoom = async (req, res) => {
   try {
     const newRoom = await Room.create({
       roomname: req.body.roomname,
-      createdBy: req.body.userId
+      createdBy: req.user._id
     });
 
     if (!newRoom) {
@@ -185,7 +179,7 @@ export const addNewRoom = async (req, res) => {
     }
 
     // update user
-    const user = await User.findOne({ username: req.user.username });
+    const user = await User.findOne({ _id: req.user._id, username: req.user.username });
     user.memberOf.push(newRoom._id);
     const updatedUser = await user.save();
 
@@ -203,16 +197,25 @@ export const addNewRoom = async (req, res) => {
 
 export const joinNewRoom = async (req, res) => {
   try {
+    const { chatId } = req.body;
+
+    // check if can cast to ObjectId
+    try {
+      mongoose.Types.ObjectId(chatId);
+    } catch (err) {
+      return res.status(404).json({ noRoom: true });
+    }
+
     // see if room exists
-    const room = await Room.findOne({ _id: req.body.chatId }).lean().exec();
+    const room = await Room.findOne({ _id: chatId }).lean().exec();
 
     if (!room) {
-      return res.status(500).json({ message: 'Could not find room by that chat ID.' });
+      return res.status(404).json({ noRoom: true });
     }
 
     // add room to memberOf property
-    const user = await User.findOne({ username: req.user.username });
-    user.memberOf.push(req.body.chatId);
+    const user = await User.findOne({ _id: req.user._id, username: req.user.username });
+    user.memberOf.push(chatId);
     const updatedUser = await user.save();
 
     // populate memberOf
@@ -229,7 +232,7 @@ export const joinNewRoom = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    const loggedOutUser = await User.findOneAndUpdate({ username: req.user.username }, { isLoggedIn: false }, { new: true }).lean().exec();
+    const loggedOutUser = await User.findOneAndUpdate({ _id: req.user._id, username: req.user.username }, { isLoggedIn: false }, { new: true }).lean().exec();
 
     if (!loggedOutUser) {
       return res.status(500).json({ message: 'Could not log out user.' });
@@ -240,21 +243,30 @@ export const logout = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-
-
 };
 
 
 export const getMessagesOnRoomChange = async (req, res) => {
   try {
-    const messages = await Message.aggregate([ { $match: { room: mongoose.Types.ObjectId(req.params.room) } }, { $sort: { createdAt: -1 } }, { $limit: global$limit } ]);
+    // get user and check if memberOf room trying to access
+    const user = await User.findOne({ _id: req.user._id, username: req.user.username });
+    const isMember = user.memberOf.some(roomId => roomId._id.toString() === req.params.room);
+    if (!isMember) return res.status(401).json({ unauthorized: true });
+
+    // isMember, therefore aggregate associated messages
+    const agg = [
+      { $match: { room: mongoose.Types.ObjectId(req.params.room) } },
+      { $sort: { createdAt: -1 } }, { $limit: global$limit }
+    ]
+    const messages = await Message.aggregate(agg);
 
     if (!messages) {
       return res.json([]);
     }
 
+    // populate messages with room and username info
     const populated = await Message
-      .populate(messages, [{path: 'room', model: 'Room', select: 'roomname'}, {path: 'username', model: 'User', select: 'username'}]);
+      .populate(messages, [ { path: 'room', model: 'Room', select: 'roomname' }, { path: 'username', model: 'User', select: 'username' } ]);
 
     return res.send(populated);
 
@@ -266,9 +278,17 @@ export const getMessagesOnRoomChange = async (req, res) => {
 
 export const getMoreMessages = async (req, res) => {
   try {
-    const { last } = req.params;
+    // current room and date of last message
+    const { room, last } = req.params;
+
+    // get user and check if memberOf room trying to access
+    const user = await User.findOne({ _id: req.user._id, username: req.user.username });
+    const isMember = user.memberOf.some(roomId => roomId._id.toString() === room);
+    if (!isMember) return res.status(401).json({ unauthorized: true });
+
+    // find earlier dates
     const agg = [
-      { $match: { createdAt: { $lt: new Date(last) } } },
+      { $match: { room: mongoose.Types.ObjectId(room), createdAt: { $lt: new Date(last) } } },
       { $sort: { createdAt: -1 } },
       { $limit: global$limit }
     ];
@@ -279,7 +299,11 @@ export const getMoreMessages = async (req, res) => {
       return res.json([]);
     }
 
-    return res.send(messages);
+    // populate messages with room and username info
+    const populated = await Message
+      .populate(messages, [ { path: 'room', model: 'Room', select: 'roomname' }, { path: 'username', model: 'User', select: 'username' } ]);
+
+    return res.send(populated);
 
   } catch (err) {
     return res.status(500).json(err.message);

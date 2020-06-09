@@ -126,7 +126,7 @@ class Namespace extends Component {
             localStorage.removeItem('token');
             this.props.history.push('/');
           } else {
-            console.log(err.message);
+            console.log(err);
           }
         });
     }
@@ -136,7 +136,7 @@ class Namespace extends Component {
   getMoreMessages(last) {
     const messages = document.getElementById('messages');
 
-    fetch(`/api/getMoreMessages/${last}`, {
+    fetch(`/api/getMoreMessages/${this.state.chatId}/${last}`, {
       method: 'GET',
       headers: getHeaders()
     })
@@ -144,7 +144,7 @@ class Namespace extends Component {
       .then(res => res.json())
       .then(data => {
         data.forEach(message => messages.innerHTML += `
-          <p data-createdat=${message.createdAt}><span class="username">${DOMPurify.sanitize(message.username)}: </span>${DOMPurify.sanitize(message.message)}</p>
+          <p data-createdat=${message.createdAt}><span class="username">${DOMPurify.sanitize(message.username.username)}: </span>${DOMPurify.sanitize(message.message)}</p>
         `);
       })
       .catch(err => {
@@ -152,7 +152,7 @@ class Namespace extends Component {
           localStorage.removeItem('token');
           this.props.history.push('/');
         } else {
-          console.log(err.message);
+          console.log(err);
         }
       });
   }
@@ -231,7 +231,7 @@ class Namespace extends Component {
     fetch('/api/addNewRoom', {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ roomname, userId: this.state.user._id })
+      body: JSON.stringify({ roomname })
     })
       .then(handleErrors)
       .then(res => res.json())
@@ -241,7 +241,7 @@ class Namespace extends Component {
           localStorage.removeItem('token');
           this.props.history.push('/');
         } else {
-          console.log(err.message);
+          console.log(err);
         }
       });
   }
@@ -260,8 +260,13 @@ class Namespace extends Component {
         if (err.unauthorized || err.expiredUser) {
           localStorage.removeItem('token');
           this.props.history.push('/');
+        } else if (err.noRoom) {
+          const radioInput = document.querySelector('#radioInput');
+          radioInput.value = 'No room with that chat ID';
+          setTimeout(() => radioInput.value = '', 2000);
+
         } else {
-          console.log(err.message);
+          console.log(err);
         }
       });
   }
@@ -301,7 +306,7 @@ class Namespace extends Component {
           localStorage.removeItem('token');
           this.props.history.push('/');
         } else {
-          console.log(err.message);
+          console.log(err);
         }
       });
   }
