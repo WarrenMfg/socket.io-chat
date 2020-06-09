@@ -30,3 +30,7 @@ h1 {
 span.username {
   font-weight: bold;
 }
+
+.is-invalid {
+  color: red;
+}

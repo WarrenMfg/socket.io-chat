@@ -32,24 +32,21 @@ class Namespace extends Component {
     const messages = document.getElementById('messages');
     const typing = document.getElementById('typing');
 
-    // DOMpurify config
-    DOMPurify.setConfig({ALLOWED_TAGS: []});
-
 
     // on someone else joining
     this.socket.on('joinMessage', data => {
       messages.innerHTML = `
-          <p>${DOMPurify.sanitize(data.username)} joined the room.</p>
-          ${messages.innerHTML}
-        `;
+        <p>${DOMPurify.sanitize(data.username)} joined the room.</p>
+        ${messages.innerHTML}
+      `;
     });
 
     // on someone else leaving
     this.socket.on('leaveMessage', data => {
       messages.innerHTML = `
-          <p>${DOMPurify.sanitize(data.username)} left the room.</p>
-          ${messages.innerHTML}
-        `;
+        <p>${DOMPurify.sanitize(data.username)} left the room.</p>
+        ${messages.innerHTML}
+      `;
     });
 
     // listen for message

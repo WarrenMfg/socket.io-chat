@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { secret, expiresIn } from '../../config/config';
+import { validate } from './utils';
 
 
 const global$limit = 20;
@@ -12,9 +13,15 @@ const global$limit = 20;
 
 export const register = async (req, res) => {
   try {
+    // validate
+    const validation = validate({ username: req.body.username.trim(), password: req.body.password.trim() }, req);
+    if (!validation.isValid) {
+      return res.status(401).json(validation);
+    }
+
     // check if username already exists
     const user = await User.findOne({ username: req.body.username }).lean().exec();
-    if (req.body.username === user?.username) return res.status(401).json({ message: 'Account with the associated username already exists.' });
+    if (req.body.username === user?.username) return res.status(401).json({ isValid: false, usernameFeedback: 'Username already exists.', passwordFeedback: '\xa0' });
 
     // create newUser
     const newUser = new User({
@@ -43,12 +50,18 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
+    // validate
+    const validation = validate({ username: req.body.username.trim(), password: req.body.password.trim() }, req);
+    if (!validation.isValid) {
+      return res.status(401).json(validation);
+    }
+
     // get user by username
     const user = await User.findOne({ username: req.body.username }).lean().exec();
 
     // if no user exists
     if (!user) {
-      return res.status(401).json({ message: 'Authentication failed. Wrong username or password.' });
+      return res.status(401).json({ isValid: false, usernameFeedback: 'Wrong username or password.', passwordFeedback: 'Wrong username or password.' });
     }
 
     // if user exists
@@ -59,7 +72,7 @@ export const login = async (req, res) => {
       .then(match => {
         // if no match, send reason
         if (!match) {
-          return res.status(401).json({ message: 'Authentication failed. Wrong username or password.' });
+          return res.status(401).json({ isValid: false, usernameFeedback: 'Wrong username or password.', passwordFeedback: 'Wrong username or password.' });
         // otherwise, passwordIsValid
         } else {
           passwordIsValid = true;

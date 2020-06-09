@@ -5,15 +5,17 @@ export default server => {
   const io = socket(server);
 
   io.on('connection', (socket) => {
-    // join
+    // join (and leave) event
     socket.on('join', data => {
-      // leave
-      socket.leave(data.previousRoom);
-      io.to(data.previousRoom).emit('leaveMessage', { username: data.username });
-      // join
+      // leave previous room
+      if (data.previousRoom) {
+        socket.leave(data.previousRoom);
+        socket.to(data.previousRoom).emit('leaveMessage', { username: data.username });
+      }
+      // join current room
       if (data.currentRoom) {
         socket.join(data.currentRoom);
-        io.to(data.currentRoom).emit('joinMessage', { username: data.username });
+        socket.to(data.currentRoom).emit('joinMessage', { username: data.username });
       }
     });
 
@@ -34,11 +36,11 @@ export default server => {
 
     // typing
     socket.on('typing', data => {
-      socket.broadcast.to(data.room).emit('typing', data);
+      socket.to(data.room).emit('typing', data);
     });
 
     socket.on('notTyping', data => {
-      socket.broadcast.to(data.room).emit('notTyping');
+      socket.to(data.room).emit('notTyping');
     });
 
   });

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import jwtDecode from 'jwt-decode';
 import { Route, Switch, withRouter } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import PrivateRoute from './PrivateRoute';
 import Namespace from './Namespace';
 import Landing from './Landing';
@@ -19,6 +20,10 @@ class App extends Component {
 
 
   componentDidMount() {
+    // DOMpurify config
+    DOMPurify.setConfig({ALLOWED_TAGS: []});
+
+
     if (localStorage.token) {
       try {
         jwtDecode(localStorage.token.split(' ')[1]);
