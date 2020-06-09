@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { getHeaders, handleErrors } from '../utils/utils';
-import jwtDecode from 'jwt-decode';
 import DOMPurify from 'dompurify';
 
 
