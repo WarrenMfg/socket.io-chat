@@ -12,7 +12,7 @@ class Namespace extends Component {
       message: '',
       notTypingTimeoutID: null,
       chatIdSelected: true,
-      chatId: ''
+      chatId: this.props.user.lastSelectedRoom._id // seed data to be controlled by Namespace component
     };
 
     this.socket = io();
@@ -29,6 +29,8 @@ class Namespace extends Component {
 
 
   componentDidMount() {
+    document.querySelector('#radioInput').value = this.state.chatId;
+
     const messages = document.getElementById('messages');
     const typing = document.getElementById('typing');
 
@@ -179,6 +181,26 @@ class Namespace extends Component {
 
 
   handleRoomChange(e) {
+    // updated db with lastSelectedRoom
+    fetch('/api/lastSelectedRoom', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ chatId: e.target.value })
+    })
+      .then(handleErrors)
+      .then(res => res.json())
+      .then(user => this.setState({
+        user,
+        chatId: user.lastSelectedRoom._id
+      }))
+      .catch(err => {
+        if (err.noRoom) {
+          console.log('Not a valid room');
+        } else {
+          console.log(err);
+        }
+      });
+
     // update input radio/label and chatId
     document.querySelector('label.active').classList.remove('active');
     const chatId = document.querySelector('#chatId');
@@ -325,15 +347,14 @@ class Namespace extends Component {
 
         <form className="mb-3">
           <div className="form-group mb-0">
-            <textarea className="form-control" id="message" rows="2" placeholder="Message..." value={this.state.message} onChange={this.handleMessageChange} disabled></textarea>
+            <textarea className="form-control" id="message" rows="2" placeholder="Message..." value={this.state.message} onChange={this.handleMessageChange}></textarea>
           </div>
 
           <button id="button" onClick={this.handleSendMessage} type="button" className="btn btn-dark btn-lg btn-block">Send</button>
         </form>
 
         <div className="list-group">
-          <select className="custom-select mb-3" id="namespace-room" onChange={this.handleRoomChange}>
-            <option defaultValue value=''>Choose a chat room</option>
+          <select className="custom-select mb-3" id="namespace-room" value={this.state.chatId} onChange={this.handleRoomChange}>
             {this.state.user.memberOf.map(room => (
               <option key={room._id} value={room._id}>{room.roomname}</option>
             ))}
