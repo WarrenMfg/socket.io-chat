@@ -321,10 +321,10 @@ class Namespace extends Component {
       <div>
 
         <small id="typing">&nbsp;</small>
-        <div id="messages"></div>
+        <div className="mb-3" id="messages"></div>
 
         <form className="mb-3">
-          <div className="form-group">
+          <div className="form-group mb-0">
             <textarea className="form-control" id="message" rows="2" placeholder="Message..." value={this.state.message} onChange={this.handleMessageChange} disabled></textarea>
           </div>
 
