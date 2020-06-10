@@ -21,7 +21,7 @@ class App extends Component {
 
   componentDidMount() {
     // DOMpurify config
-    DOMPurify.setConfig({ALLOWED_TAGS: []});
+    DOMPurify.setConfig({ALLOWED_TAGS: ['br']});
 
 
     if (localStorage.token) {
