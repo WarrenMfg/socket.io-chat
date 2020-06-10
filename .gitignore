@@ -3,4 +3,4 @@ package-lock.json
 dist
 bundle.js
 TODO
-config
+config.js
