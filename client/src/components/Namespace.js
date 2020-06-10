@@ -203,7 +203,7 @@ class Namespace extends Component {
     const placeholders = {
       chatId: 'Choose a chat room to share ID',
       addNew: 'Enter a new chat room name',
-      joinNew: 'Enter a new chat ID'
+      joinNew: 'Enter chat ID'
     };
 
     document.querySelector('label.active').classList.remove('active');
