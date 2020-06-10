@@ -51,6 +51,7 @@ class Namespace extends Component {
 
     // listen for message
     this.socket.on('message', data => {
+      data.message = data.message.replace(/\r\n|\r|\n/g, '<br>');
       messages.innerHTML = `
         <p data-createdat=${data.createdAt}><span class="username">${DOMPurify.sanitize(data.username.username)}: </span>${DOMPurify.sanitize(data.message)}</p>
         ${messages.innerHTML}
@@ -117,9 +118,10 @@ class Namespace extends Component {
         .then(res => res.json())
         .then(data => {
           messages.innerHTML = '';
-          data.forEach(message => messages.innerHTML += `
-            <p data-createdat=${message.createdAt}><span class="username">${DOMPurify.sanitize(message.username.username)}: </span>${DOMPurify.sanitize(message.message)}</p>
-          `);
+          data.forEach(message => {
+            message.message = message.message.replace(/\r\n|\r|\n/g, '<br>');
+            messages.innerHTML += `<p data-createdat=${message.createdAt}><span class="username">${DOMPurify.sanitize(message.username.username)}: </span>${DOMPurify.sanitize(message.message)}</p>`;
+          });
         })
         .catch(err => {
           if (err.unauthorized || err.expiredUser) {
@@ -143,9 +145,10 @@ class Namespace extends Component {
       .then(handleErrors)
       .then(res => res.json())
       .then(data => {
-        data.forEach(message => messages.innerHTML += `
-          <p data-createdat=${message.createdAt}><span class="username">${DOMPurify.sanitize(message.username.username)}: </span>${DOMPurify.sanitize(message.message)}</p>
-        `);
+        data.forEach(message => {
+          message.message = message.message.replace(/\r\n|\r|\n/g, '<br>');
+          messages.innerHTML += `<p data-createdat=${message.createdAt}><span class="username">${DOMPurify.sanitize(message.username.username)}: </span>${DOMPurify.sanitize(message.message)}</p>`;
+        });
       })
       .catch(err => {
         if (err.unauthorized || err.expiredUser) {
