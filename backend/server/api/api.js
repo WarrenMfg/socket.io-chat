@@ -287,7 +287,7 @@ export const lastSelectedRoom = async (req, res) => {
 };
 
 
-export const getMessagesOnRoomChange = async (req, res) => {
+export const getMessagesOnLoadAndRoomChange = async (req, res) => {
   try {
     // get user and check if memberOf room trying to access
     const user = await User.findOne({ _id: req.user._id, username: req.user.username });

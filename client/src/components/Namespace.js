@@ -10,6 +10,7 @@ class Namespace extends Component {
     this.state = {
       user: this.props.user, // seed data to be controlled by Namespace component
       message: '',
+      radioInput: this.props.user.lastSelectedRoom._id, // seed data to be controlled by Namespace component
       notTypingTimeoutID: null,
       chatIdSelected: true,
       chatId: this.props.user.lastSelectedRoom._id // seed data to be controlled by Namespace component
@@ -22,6 +23,7 @@ class Namespace extends Component {
     this.handleMessageChange = this.handleMessageChange.bind(this);
     this.handleSendMessage = this.handleSendMessage.bind(this);
     this.handleLogout = this.handleLogout.bind(this);
+    this.handleRadioInputTextChange = this.handleRadioInputTextChange.bind(this);
     this.handleRadioInputChange = this.handleRadioInputChange.bind(this);
     this.handleAddOrJoin = this.handleAddOrJoin.bind(this);
     this.handleRoomChange = this.handleRoomChange.bind(this);
@@ -29,8 +31,6 @@ class Namespace extends Component {
 
 
   componentDidMount() {
-    document.querySelector('#radioInput').value = this.state.chatId;
-
     const messages = document.getElementById('messages');
     const typing = document.getElementById('typing');
 
@@ -67,6 +67,31 @@ class Namespace extends Component {
     this.socket.on('notTyping', () => {
       typing.innerText = '\xa0'; // &nbsp;
     });
+
+
+    // join lastSelectedRoom
+    this.socket.emit('join', { previousRoom: '', currentRoom: this.state.chatId, username: this.state.user.username });
+    // fetch messages on load
+    fetch(`/api/getMessagesOnLoadAndRoomChange/${this.state.chatId}`, {
+      method: 'GET',
+      headers: getHeaders()
+    })
+      .then(handleErrors)
+      .then(res => res.json())
+      .then(data => {
+        messages.innerHTML = '';
+        data.forEach(message => {
+          messages.innerHTML += `<p data-createdat=${message.createdAt}><span class="username">${DOMPurify.sanitize(message.username.username)}: </span>${DOMPurify.sanitize(message.message)}</p>`;
+        });
+      })
+      .catch(err => {
+        if (err.unauthorized || err.expiredUser) {
+          localStorage.removeItem('token');
+          this.props.history.push('/');
+        } else {
+          console.log(err);
+        }
+      });
 
 
     // throttled infinite scrolling
@@ -110,8 +135,8 @@ class Namespace extends Component {
       this.socket.emit('join', { previousRoom: prevState.chatId, currentRoom: this.state.chatId, username: this.state.user.username });
 
 
-      // fetch messages on load
-      fetch(`/api/getMessagesOnRoomChange/${this.state.chatId}`, {
+      // fetch messages on room change
+      fetch(`/api/getMessagesOnLoadAndRoomChange/${this.state.chatId}`, {
         method: 'GET',
         headers: getHeaders()
       })
@@ -207,17 +232,22 @@ class Namespace extends Component {
     chatId.checked = true;
     chatId.parentElement.classList.add('active');
 
-    const radioInput = document.querySelector('#radioInput');
-    radioInput.value = e.target.value;
-    this.setState({ chatId: e.target.value, chatIdSelected: true });
+    // const radioInput = document.querySelector('#radioInput');
+    // radioInput.value = e.target.value;
+    this.setState({ chatId: e.target.value, chatIdSelected: true, radioInput: e.target.value });
 
     // enable/disable message textarea
-    const message = document.querySelector('#message');
-    if (e.target.value) {
-      message.disabled = false;
-    } else {
-      message.disabled = true;
-    }
+    // const message = document.querySelector('#message');
+    // if (e.target.value) {
+    //   message.disabled = false;
+    // } else {
+    //   message.disabled = true;
+    // }
+  }
+
+
+  handleRadioInputTextChange(e) {
+    this.setState({ radioInput: e.target.value });
   }
 
 
@@ -228,24 +258,25 @@ class Namespace extends Component {
       joinNew: 'Enter chat ID'
     };
 
+    // update placeholder text
     document.querySelector('label.active').classList.remove('active');
     e.target.parentElement.classList.add('active');
     const radioInput = document.querySelector('#radioInput');
     radioInput.placeholder = placeholders[e.target.id];
 
-    e.target.id === 'chatId' ? this.setState({ chatIdSelected: true }) : this.setState({ chatIdSelected: false });
-    e.target.id === 'chatId' && this.state.chatId ? radioInput.value = this.state.chatId : radioInput.value = '';
+    e.target.id === 'chatId' ? this.setState({ chatIdSelected: true, radioInput: this.state.chatId }) : this.setState({ chatIdSelected: false, radioInput: '' });
+    // e.target.id === 'chatId' && this.state.chatId ? radioInput.value = this.state.chatId : radioInput.value = '';
   }
 
 
   handleAddOrJoin(e) {
-    const radioInput = document.querySelector('#radioInput');
+    // const radioInput = document.querySelector('#radioInput');
     const action = document.querySelector('input[type="radio"]:checked').id;
 
-    if (action === 'addNew') this.addNew(radioInput.value);
-    else this.joinNew(radioInput.value);
+    if (action === 'addNew') this.addNew(this.state.radioInput);
+    else this.joinNew(this.state.radioInput);
 
-    radioInput.value = '';
+    // radioInput.value = '';
   }
 
 
@@ -257,7 +288,7 @@ class Namespace extends Component {
     })
       .then(handleErrors)
       .then(res => res.json())
-      .then(user => this.setState({ user }))
+      .then(user => this.setState({ user, radioInput: '' }))
       .catch(err => {
         if (err.unauthorized || err.expiredUser) {
           localStorage.removeItem('token');
@@ -277,15 +308,16 @@ class Namespace extends Component {
     })
       .then(handleErrors)
       .then(res => res.json())
-      .then(user => this.setState({ user }))
+      .then(user => this.setState({ user, radioInput: '' }))
       .catch(err => {
         if (err.unauthorized || err.expiredUser) {
           localStorage.removeItem('token');
           this.props.history.push('/');
         } else if (err.noRoom) {
-          const radioInput = document.querySelector('#radioInput');
-          radioInput.value = 'No room with that chat ID';
-          setTimeout(() => radioInput.value = '', 2000);
+          // const radioInput = document.querySelector('#radioInput');
+          // radioInput.value = 'No room with that chat ID';
+          this.setState({ radioInput: 'No room with that chat ID' });
+          setTimeout(() => this.setState({ radioInput: '' }), 2000);
 
         } else {
           console.log(err);
@@ -375,7 +407,7 @@ class Namespace extends Component {
           </div>
 
           <div className="input-group mb-3">
-            <input id="radioInput" type="text" className="form-control" placeholder="Choose a chat room to share ID" />
+            <input id="radioInput" type="text" className="form-control" value={this.state.radioInput} onChange={this.handleRadioInputTextChange} placeholder="Choose a chat room to share ID" />
             {!this.state.chatIdSelected &&
               <div className="input-group-append">
                 <button className="btn btn-outline-secondary" type="button" onClick={this.handleAddOrJoin}>Submit</button>
