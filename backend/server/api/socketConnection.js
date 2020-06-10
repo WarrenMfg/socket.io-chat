@@ -22,6 +22,7 @@ export default server => {
     // message
     socket.on('message', async data => {
       try {
+        data.message = data.message.replace(/\r\n|\r|\n/g, '<br>');
         const message = await Message.create(data);
 
         if (message) {
