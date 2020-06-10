@@ -7,6 +7,7 @@ import {
   addNewRoom,
   joinNewRoom,
   logout,
+  lastSelectedRoom,
   getMessagesOnRoomChange,
   getMoreMessages
 } from './api';
@@ -35,6 +36,10 @@ apiRouter.route('/addNewRoom')
 apiRouter.route('/joinNewRoom')
   .all(loginRequired)
   .post(joinNewRoom);
+
+apiRouter.route('/lastSelectedRoom')
+  .all(loginRequired)
+  .post(lastSelectedRoom);
 
 apiRouter.route('/getMessagesOnRoomChange/:room')
   .all(loginRequired)

@@ -21,7 +21,11 @@ const UserSchema = new mongoose.Schema(
         type: mongoose.ObjectId,
         ref: 'Room'
       }
-    ]
+    ],
+    lastSelectedRoom: {
+      type: mongoose.ObjectId,
+      ref: 'Room'
+    }
   },
   {
     timestamps: true

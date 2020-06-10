@@ -29,18 +29,30 @@ export const register = async (req, res) => {
       password: req.body.password
     });
 
+    // create default lastSelectedRoom
+    const defaultRoom = new Room({
+      roomname: 'My Room',
+      createdBy: newUser._id
+    });
+    // add default lastSelectedRoom to memberOf
+    newUser.memberOf.push(defaultRoom._id);
+    // make defaultRoom _id lastSelectedRoom
+    newUser.lastSelectedRoom = defaultRoom._id;
+
     // hash password
     await bcrypt.hash(newUser.password, 10)
       .then(hash => newUser.password = hash)
       .catch(err => res.status(500).json({ message: err.message }));
 
-    // save new user
-    newUser.save()
-      .then(user => {
-        user.password = undefined;
-        res.send(user);
-      })
-      .catch(err => res.status(500).json({ message: err.message }));
+    // save new user and new room
+    const savedUser = await newUser.save();
+    await defaultRoom.save();
+
+    // populate with memberOf and lastSelectedRoom
+    await savedUser.execPopulate('memberOf lastSelectedRoom');
+    savedUser.password = undefined;
+
+    return res.send(savedUser);
 
   } catch(err) {
     res.status(500).json({ message: err.message });
@@ -90,7 +102,7 @@ export const login = async (req, res) => {
       // send token
       } else {
         // populate memberOf
-        const populated = await loggedInUser.execPopulate('memberOf');
+        const populated = await loggedInUser.execPopulate('memberOf lastSelectedRoom');
         populated.password = undefined;
 
         const payload = {
@@ -156,7 +168,7 @@ export const getLoggedInUser = async (req, res) => {
     }
 
     // populate memberOf
-    const populated = await user.execPopulate('memberOf');
+    const populated = await user.execPopulate('memberOf lastSelectedRoom');
     populated.password = undefined;
 
     return res.send(populated);
@@ -184,7 +196,7 @@ export const addNewRoom = async (req, res) => {
     const updatedUser = await user.save();
 
     // populate memberOf
-    const populated = await updatedUser.execPopulate('memberOf');
+    const populated = await updatedUser.execPopulate('memberOf lastSelectedRoom');
     populated.password = undefined;
 
     return res.send(populated);
@@ -219,7 +231,7 @@ export const joinNewRoom = async (req, res) => {
     const updatedUser = await user.save();
 
     // populate memberOf
-    const populated = await updatedUser.execPopulate('memberOf');
+    const populated = await updatedUser.execPopulate('memberOf lastSelectedRoom');
     populated.password = undefined;
 
     return res.send(populated);
@@ -242,6 +254,35 @@ export const logout = async (req, res) => {
 
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+
+export const lastSelectedRoom = async (req, res) => {
+  try {
+    const { chatId } = req.body;
+
+    // check if can cast to ObjectId
+    try {
+      mongoose.Types.ObjectId(chatId);
+    } catch (err) {
+      return res.status(404).json({ noRoom: true });
+    }
+
+    // update user.lastSelectedRoom with chatId
+    const user = await User.findOne({ _id: req.user._id, username: req.user.username });
+    user.lastSelectedRoom = chatId;
+    await user.save();
+
+    // populate memberOf
+    const populated = await user.execPopulate('memberOf lastSelectedRoom');
+    populated.password = undefined;
+
+    return res.send(populated);
+
+
+  } catch (err) {
+
   }
 };
 
