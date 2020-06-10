@@ -6,7 +6,7 @@ import apiRoutes from './api/apiRoutes';
 import { connect } from '../database/index';
 import socketConnection from './api/socketConnection';
 import { resolve } from 'path';
-import { secret } from '../config/config';
+import { secret } from '../config/config_dev';
 
 
 // setup

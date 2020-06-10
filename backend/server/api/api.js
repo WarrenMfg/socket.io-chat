@@ -4,7 +4,7 @@ import Room from '../../database/models/Room';
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { secret, expiresIn } from '../../config/config';
+import { secret, expiresIn } from '../../config/config_dev';
 import { validate } from './utils';
 
 
