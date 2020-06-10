@@ -292,6 +292,10 @@ class Namespace extends Component {
 
 
   handleLogout() {
+    // leave room
+    this.setState({ chatId: '' });
+
+    // logout
     fetch('/api/logout', {
       method: 'POST',
       headers: getHeaders()
