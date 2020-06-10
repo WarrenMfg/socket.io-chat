@@ -160,6 +160,12 @@ class Namespace extends Component {
   }
 
 
+  componentWillUnmount() {
+    // leave room when user logs out
+    this.socket.emit('join', { previousRoom: this.state.chatId, currentRoom: '', username: this.state.user.username });
+  }
+
+
   getMoreMessages(last) {
     const messages = document.getElementById('messages');
 
@@ -206,7 +212,7 @@ class Namespace extends Component {
 
 
   handleRoomChange(e) {
-    // updated db with lastSelectedRoom
+    // update db with lastSelectedRoom
     fetch('/api/lastSelectedRoom', {
       method: 'POST',
       headers: getHeaders(),
@@ -232,17 +238,7 @@ class Namespace extends Component {
     chatId.checked = true;
     chatId.parentElement.classList.add('active');
 
-    // const radioInput = document.querySelector('#radioInput');
-    // radioInput.value = e.target.value;
     this.setState({ chatId: e.target.value, chatIdSelected: true, radioInput: e.target.value });
-
-    // enable/disable message textarea
-    // const message = document.querySelector('#message');
-    // if (e.target.value) {
-    //   message.disabled = false;
-    // } else {
-    //   message.disabled = true;
-    // }
   }
 
 
@@ -265,18 +261,14 @@ class Namespace extends Component {
     radioInput.placeholder = placeholders[e.target.id];
 
     e.target.id === 'chatId' ? this.setState({ chatIdSelected: true, radioInput: this.state.chatId }) : this.setState({ chatIdSelected: false, radioInput: '' });
-    // e.target.id === 'chatId' && this.state.chatId ? radioInput.value = this.state.chatId : radioInput.value = '';
   }
 
 
   handleAddOrJoin(e) {
-    // const radioInput = document.querySelector('#radioInput');
     const action = document.querySelector('input[type="radio"]:checked').id;
 
     if (action === 'addNew') this.addNew(this.state.radioInput);
     else this.joinNew(this.state.radioInput);
-
-    // radioInput.value = '';
   }
 
 
@@ -314,8 +306,6 @@ class Namespace extends Component {
           localStorage.removeItem('token');
           this.props.history.push('/');
         } else if (err.noRoom) {
-          // const radioInput = document.querySelector('#radioInput');
-          // radioInput.value = 'No room with that chat ID';
           this.setState({ radioInput: 'No room with that chat ID' });
           setTimeout(() => this.setState({ radioInput: '' }), 2000);
 
@@ -346,10 +336,6 @@ class Namespace extends Component {
 
 
   handleLogout() {
-    // leave room
-    this.setState({ chatId: '' });
-
-    // logout
     fetch('/api/logout', {
       method: 'POST',
       headers: getHeaders()
@@ -382,7 +368,7 @@ class Namespace extends Component {
             <textarea className="form-control" id="message" rows="2" placeholder="Message..." value={this.state.message} onChange={this.handleMessageChange}></textarea>
           </div>
 
-          <button id="button" onClick={this.handleSendMessage} type="button" className="btn btn-dark btn-lg btn-block">Send</button>
+          <button id="button" onClick={this.handleSendMessage} type="button" className="btn btn-success btn-lg btn-block">Send</button>
         </form>
 
         <div className="list-group">
@@ -393,15 +379,15 @@ class Namespace extends Component {
           </select>
 
           <div className="btn-group btn-group-toggle" data-toggle="buttons">
-            <label className="btn btn-secondary active">
+            <label className="btn btn-outline-info active">
               <input type="radio" name="options" id="chatId" onClick={this.handleRadioInputChange} />Chat ID
             </label>
 
-            <label className="btn btn-secondary">
+            <label className="btn btn-outline-info">
               <input type="radio" name="options" id="addNew" onClick={this.handleRadioInputChange} />Add New
             </label>
 
-            <label className="btn btn-secondary">
+            <label className="btn btn-outline-info">
               <input type="radio" name="options" id="joinNew" onClick={this.handleRadioInputChange} />Join New
             </label>
           </div>
@@ -410,14 +396,14 @@ class Namespace extends Component {
             <input id="radioInput" type="text" className="form-control" value={this.state.radioInput} onChange={this.handleRadioInputTextChange} placeholder="Choose a chat room to share ID" />
             {!this.state.chatIdSelected &&
               <div className="input-group-append">
-                <button className="btn btn-outline-secondary" type="button" onClick={this.handleAddOrJoin}>Submit</button>
+                <button className="btn btn-outline-info" type="button" onClick={this.handleAddOrJoin}>Submit</button>
               </div>
             }
           </div>
 
         </div>
 
-        <button type="button" className="btn btn-dark btn-lg btn-block" onClick={this.handleLogout}>Logout</button>
+        <button type="button" className="btn btn-outline-secondary btn-lg btn-block" onClick={this.handleLogout}>Logout</button>
 
       </div>
     )
